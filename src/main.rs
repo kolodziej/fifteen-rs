@@ -45,10 +45,10 @@ impl GameStateNode {
 
     fn get_move(&self, direction: usize) -> Option<Rc<GameStateNode>> {
         let mut moves = self.moves.borrow_mut();
-        if moves[direction].is_none() {
+        if moves[direction].is_none() && self.game_state.can_move(direction) {
             moves[direction] = Some(GameStateNode::new(self.game_state.movement(direction)));
         }
-        moves[direction].clone()
+        moves[direction].as_ref().cloned()
     }
 }
 
