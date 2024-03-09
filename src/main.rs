@@ -7,6 +7,7 @@ use std::clone::Clone;
 use std::fmt;
 use rand::{Rng, thread_rng};
 use std::collections::{VecDeque, HashSet};
+use log::trace;
 
 #[derive(Parser, Debug)]
 struct Arguments {
@@ -154,7 +155,7 @@ impl GameState {
         /* Fields can be swapped if they are in the same row and column index differs by one OR they are in the same column and row index differs by one. */
         let (row1, col1) = GameState::indexes(f1);
         let (row2, col2) = GameState::indexes(f2);
-        println!("can_be_swapped({}, {})? row1: {}, row2: {}, col1: {}, col2: {}", f1, f2, row1, row2, col1, col2);
+        trace!("can_be_swapped({}, {})? row1: {}, row2: {}, col1: {}, col2: {}", f1, f2, row1, row2, col1, col2);
 
         (row1 == row2 && (i32::abs((col1 as i32) - (col2 as i32)) == 1)) || (col1 == col2 && (i32::abs((row1 as i32) - (row2 as i32)) == 1))
     }
@@ -281,7 +282,8 @@ fn bfs_solver(init_state: Rc<GameStateNode>) -> u64 {
             break;
         }
 
-        for direction in 0..=3 {
+        let moves: [usize; 4] = [ 2, 3, 1, 0 ];
+        for direction in moves {
             if let Some(S) = next_state.get_move(direction) { queue.push_back(S) }
         }
 
@@ -291,6 +293,50 @@ fn bfs_solver(init_state: Rc<GameStateNode>) -> u64 {
         }
 
         n += 1
+    }
+
+    n
+}
+
+fn dfs_solver(init_state: Rc<GameStateNode>) -> u64 {
+    let mut n = 0;
+    let mut stack = Vec::<Rc<GameStateNode>>::new();
+    let mut visited_states: HashSet<u64> = HashSet::new();
+
+    stack.push(init_state);
+
+    /*
+     *     a
+     *    / \
+     *   b   c
+     */
+    let mut depth: u64 = 0;
+    loop {
+        if stack.is_empty() {
+            break;
+        }
+
+        let top = stack.pop().unwrap();
+
+        if visited_states.contains(&top.game_state.state) {
+            continue;
+        }
+
+        // add max depth limit
+        visited_states.insert(top.game_state.state);
+
+        if top.game_state.is_sorted() {
+            break;
+        }
+
+        let moves: [usize; 4] = [2, 3, 1, 0];
+        for direction in moves {
+            if let Some(S) = top.get_move(direction) {
+                stack.push(S);
+            }
+        }
+
+        n += 1;
     }
 
     n
@@ -319,10 +365,12 @@ fn main() {
     let n3 = n2.get_move(GameStateNode::RIGHT).unwrap();
     println!("n3: {}", n3.game_state);
 
-
     let r1 = GameStateNode::new(GameState::create_random());
     println!("r1: {}", r1.game_state);
 
-    let moves = bfs_solver(r1);
-    println!("solved r1 in {} moves", moves);
+    let moves = bfs_solver(n3.clone());
+    println!("solved n3 in {} moves", moves);
+
+    let dfs_moves = dfs_solver(n3);
+    println!("solved n3 with dfs in {} moves", dfs_moves);
 }

@@ -9,3 +9,4 @@ edition = "2021"
 clap = { version = "4.4.6", features = ["derive"] }
 once_cell = { version = "1.18.0", features = [] }
 rand = { version = "0.8.5", features = [] }
+log = "0.4.20"
