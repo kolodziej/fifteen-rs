@@ -2,3 +2,8 @@ target
 debug
 
 **/*.sr.bk
+
+
+# Added by cargo
+
+/target
