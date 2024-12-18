@@ -8,6 +8,8 @@ use std::fmt;
 use rand::{Rng, thread_rng};
 use std::collections::{VecDeque, HashSet};
 
+mod puzzlesolver;
+
 #[derive(Parser, Debug)]
 struct Arguments {
     #[arg(short, long)]
@@ -21,6 +23,48 @@ struct Arguments {
 struct GameState {
     state: u64,
     empty_field: u8,
+}
+
+impl puzzlesolver::Board for GameState {
+    fn up(&self) -> Result<puzzlesolver::BoardPtr, ()> {
+        if self.can_move_up() {
+            self.move_up();
+            Ok(puzzlesolver::BoardPtr::State(self.state))
+        } else {
+            Err(())
+        }
+    }
+
+    fn down(&self) -> Result<puzzlesolver::BoardPtr, ()> {
+        if self.can_move_down() {
+            self.move_down();
+            Ok(puzzlesolver::BoardPtr::State(self.state))
+        } else {
+            Err(())
+        }
+    }
+
+    fn left(&self) -> Result<puzzlesolver::BoardPtr, ()> {
+        if self.can_move_left() {
+            self.move_left();
+            Ok(puzzlesolver::BoardPtr::State(self.state))
+        } else {
+            Err(())
+        }
+    }
+
+    fn right(&self) -> Result<puzzlesolver::BoardPtr, ()> {
+        if self.can_move_right() {
+            self.move_right();
+            Ok(puzzlesolver::BoardPtr::State(self.state))
+        } else {
+            Err(())
+        }
+    }
+
+    fn solved(&self) -> bool {
+        true
+    }
 }
 
 struct GameStateNode {
